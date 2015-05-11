@@ -45,11 +45,14 @@
  *  When the view loads we attach handlers for the events we're interested in. KILabel differenciates
  *  between taps on different types of link.
  */
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
     _label.systemURLStyle = YES;
+    
+    [self.label setExtraUserHandleArray: @[@"interactive", @"Tap"]];
 
     // Attach block for handling taps on usenames
     _label.userHandleLinkTapHandler = ^(KILabel *label, NSString *string, NSRange range) {

@@ -194,6 +194,11 @@ IB_DESIGNABLE
  */
 - (nullable NSDictionary*)linkAtPoint:(CGPoint)point;
 
+/**
+ * :Sally add free form user handles to an array
+ */
+- (void) setExtraUserHandleArray: (NSArray * __nullable)handles;
+
 @end
 
 NS_ASSUME_NONNULL_END

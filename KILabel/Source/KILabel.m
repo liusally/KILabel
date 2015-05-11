@@ -51,6 +51,12 @@ NSString * const KILabelLinkKey = @"link";
 // During a touch, range of text that is displayed as selected
 @property (nonatomic, assign) NSRange selectedRange;
 
+// :Sally array of user handles which have different format than @handle
+@property (nonatomic, retain) NSArray *userHandleArray;
+
+// :Sally regex dic for table performance (detect repeation) needs further optimization, since this dictionary is within a label instead of within a table
+@property (nonatomic, retain) NSMutableDictionary *regexDictionary;
+
 @end
 
 #pragma mark - Implementation
@@ -82,6 +88,12 @@ NSString * const KILabelLinkKey = @"link";
     }
     
     return self;
+}
+
+- (void) setExtraUserHandleArray: (NSArray * __nullable)handles {
+    self.userHandleArray = handles;
+    // Establish the text store with our current text
+    [self updateTextStoreWithText];
 }
 
 // Common initialisation. Must be done once during construction.
@@ -396,14 +408,41 @@ NSString * const KILabelLinkKey = @"link";
 - (NSArray *)getRangesForUserHandles:(NSString *)text
 {
     NSMutableArray *rangesForUserHandles = [[NSMutableArray alloc] init];
-    
+    NSString *baseString = @"(?<!\\w)@([\\w\\_]+)?";
     // Setup a regular expression for user handles and hashtags
     static NSRegularExpression *regex = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSError *error = nil;
-        regex = [[NSRegularExpression alloc] initWithPattern:@"(?<!\\w)@([\\w\\_]+)?" options:0 error:&error];
+
+        regex = [self regexWithInput: baseString];
     });
+    
+    //:Sally add custom user handles
+    if (self.userHandleArray != nil) {
+        NSMutableString *regexStr = [[NSMutableString alloc] initWithString: baseString];
+        for (NSString *handle in self.userHandleArray) {
+            [regexStr appendString:@"|"];
+            [regexStr appendString:handle];
+        }
+        
+        BOOL shouldLoad = NO;
+        // put regex string in dictionary to avoid repeat parsing
+        if (self.regexDictionary == nil) {
+            shouldLoad = YES;
+            self.regexDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys: @(1), regexStr, nil];
+        } else {
+            id value = [self.regexDictionary objectForKey:regexStr];
+            if (value == nil) {
+                shouldLoad = YES;
+                
+                self.regexDictionary[regexStr] = @(1);
+            }
+        }
+        
+        if (shouldLoad) {
+            regex = [self regexWithInput:regexStr];
+        }
+    }
     
     // Run the expression and get matches
     NSArray *matches = [regex matchesInString:text options:0 range:NSMakeRange(0, text.length)];
@@ -424,6 +463,14 @@ NSString * const KILabelLinkKey = @"link";
     }
     
     return rangesForUserHandles;
+}
+
+- (NSRegularExpression *)regexWithInput: (NSString *) regexInput {
+    NSError *error = nil;
+    NSMutableString *regexStr = [[NSMutableString alloc] initWithString: regexInput];
+    
+    NSRegularExpression *regex = [[NSRegularExpression alloc] initWithPattern:regexStr options:0 error:&error];
+    return regex;
 }
 
 - (NSArray *)getRangesForHashtags:(NSString *)text
