@@ -425,19 +425,19 @@ NSString * const KILabelLinkKey = @"link";
             [regexStr appendString:handle];
         }
         
-        BOOL shouldLoad = NO;
-        // put regex string in dictionary to avoid repeat parsing
-        if (self.regexDictionary == nil) {
-            shouldLoad = YES;
-            self.regexDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys: @(1), regexStr, nil];
-        } else {
-            id value = [self.regexDictionary objectForKey:regexStr];
-            if (value == nil) {
-                shouldLoad = YES;
-                
-                self.regexDictionary[regexStr] = @(1);
-            }
-        }
+        BOOL shouldLoad = YES;
+        // put regex string in dictionary to avoid repeat parsing  :Sally dic is not synchronized and shouldn't be within label
+//        if (self.regexDictionary == nil) {
+//            shouldLoad = YES;
+//            self.regexDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys: @(1), regexStr, nil];
+//        } else {
+//            id value = [self.regexDictionary objectForKey:regexStr];
+//            if (value == nil) {
+//                shouldLoad = YES;
+//                
+//                self.regexDictionary[regexStr] = @(1);
+//            }
+//        }
         
         if (shouldLoad) {
             regex = [self regexWithInput:regexStr];
