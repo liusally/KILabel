@@ -408,7 +408,7 @@ NSString * const KILabelLinkKey = @"link";
 - (NSArray *)getRangesForUserHandles:(NSString *)text
 {
     NSMutableArray *rangesForUserHandles = [[NSMutableArray alloc] init];
-    NSString *baseString = @"(?<!\\w)@([\\w\\_]+)?";
+    NSString *baseString = @"(?<!\\w)@([\\w\\_\\.]+)?";
     // Setup a regular expression for user handles and hashtags
     static NSRegularExpression *regex = nil;
     static dispatch_once_t onceToken;
